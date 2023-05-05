@@ -1,0 +1,27 @@
+name: "CI"
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+    name: CI
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # - name: Setup Python
+      #   run: poetry install && 
+      # - name: Unit Tests
+      #   run: ./scripts/test.sh -k unit
+      # - name: Build images
+      #   run: ./scripts/build.sh
+      # - name: Deploy stack
+      #   run: ./scripts/deploy.sh
+      # - name: Integration Tests
+      #   run: ./scripts/test.sh -k integration
+      # - name: End-to-End Tests
+      #   run: ./scripts/test.sh -k e2e

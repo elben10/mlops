@@ -2,5 +2,6 @@
 
 set -e
 
-bash ./config.sh --ephemeral --unattended --url $URL --token $TOKEN
-bash ./run.sh
+./config.sh --ephemeral --unattended --url $URL --token $TOKEN
+./run.sh
+./config.sh remove --token "$TOKEN"
