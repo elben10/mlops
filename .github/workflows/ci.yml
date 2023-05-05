@@ -17,8 +17,8 @@ jobs:
         run: poetry install
       - name: Unit Tests
         run: ./scripts/test.sh -m unit
-      - name: Build images
-        run: ./scripts/build.sh
+      # - name: Build images
+      #   run: ./scripts/build.sh
       - name: Deploy stack
         run: ./scripts/deploy.sh
       - name: Integration Tests
