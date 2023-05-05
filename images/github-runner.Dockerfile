@@ -14,7 +14,8 @@ RUN curl -O -L https://github.com/actions/runner/releases/download/v$GITHUB_RUNN
 
 RUN curl -sSL https://get.docker.com/ | sh
 
-RUN pipx install poetry
+RUN pip install poetry && \
+    poetry config virtualenvs.create false
 
 COPY images/scripts/github-runner-entrypoint.sh docker-entrypoint.sh
 

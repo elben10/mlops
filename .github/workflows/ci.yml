@@ -13,15 +13,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      # - name: Setup Python
-      #   run: poetry install && 
-      # - name: Unit Tests
-      #   run: ./scripts/test.sh -k unit
-      # - name: Build images
-      #   run: ./scripts/build.sh
-      # - name: Deploy stack
-      #   run: ./scripts/deploy.sh
-      # - name: Integration Tests
-      #   run: ./scripts/test.sh -k integration
-      # - name: End-to-End Tests
-      #   run: ./scripts/test.sh -k e2e
+      - name: Install python dependencies
+        run: poetry install
+      - name: Unit Tests
+        run: ./scripts/test.sh -m unit
+      - name: Build images
+        run: ./scripts/build.sh
+      - name: Deploy stack
+        run: ./scripts/deploy.sh
+      - name: Integration Tests
+        run: ./scripts/test.sh -m integration
+      - name: End-to-End Tests
+        run: ./scripts/test.sh -m e2e
