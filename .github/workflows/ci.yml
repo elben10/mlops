@@ -19,8 +19,8 @@ jobs:
         run: ./scripts/test.sh -m unit
       # - name: Build images
       #   run: ./scripts/build.sh
-      - name: Deploy stack
-        run: ./scripts/deploy.sh
+      # - name: Deploy stack
+      #   run: ./scripts/deploy.sh
       - name: Integration Tests
         run: ./scripts/test.sh -m integration
       - name: End-to-End Tests
