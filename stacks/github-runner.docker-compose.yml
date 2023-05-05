@@ -1,0 +1,12 @@
+services:
+  github-runner:
+    build:
+      context: ..
+      dockerfile: images/github-runner.Dockerfile
+    environment:
+      TOKEN: ${GITHUB_TOKEN?Variable GITHUB_TOKEN not set}
+      URL: ${GITHUB_URL?Variable GITHUB_URL not set}
+    image: github-runner:latest
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
