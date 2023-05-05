@@ -4,7 +4,7 @@ set -e
 
 if [ -z "$1" ]
   then
-    pytest tests
+    pytest
   else
-    pytest tests $@
+    pytest $@
 fi
