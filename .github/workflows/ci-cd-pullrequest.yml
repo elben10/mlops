@@ -45,6 +45,7 @@ jobs:
       - name: Deploy stack
         run: |
           kompose convert -f stacks/docker-compose.yml -o stacks/k8s.yml
+          ls stacks
           kubectl apply -f stacks/k8s.yml
       - name: Run tests
         run: poetry run pytest -m e2e
