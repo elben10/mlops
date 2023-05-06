@@ -3,17 +3,21 @@ on:
   pull_request:
 
 jobs:
-  build:
+  unit-tests:
     runs-on: ubuntu-22.04
-    name: CI
+    name: Unit Tests
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install poetry
-        run: pipx install poetry
+        run: |
+          pipx install poetry && \
+          poetry config virtualenvs.create false
       - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
           cache: "poetry"
       - name: Install python dependencies
         run: poetry install
+      - name: Run tests
+        run: pytest -m unit
