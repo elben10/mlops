@@ -44,6 +44,7 @@ jobs:
       #   run: kind create cluster
       - name: Deploy stack
         run: |
+          kompose --help
           kompose convert -f stacks/docker-compose.yml -o stacks/k8s.yml
           ls
           ls stacks
