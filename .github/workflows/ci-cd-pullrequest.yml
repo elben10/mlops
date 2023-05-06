@@ -38,8 +38,8 @@ jobs:
         run: poetry install
       - name: Install kompose
         run: |
-          curl -L https://github.com/kubernetes/kompose/releases/download/v1.28.0/kompose-linux-amd64 -o /usr/bin/local/kompose
-          chmod +x /usr/bin/local/kompose
+          curl https://github.com/kubernetes/kompose/releases/download/v1.28.0/kompose-linux-amd64 -o /usr/local/bin/kompose
+          chmod +x /usr/local/bin/kompose
       - name: Install k8s cluster
         run: kind create cluster
       - name: Deploy stack
