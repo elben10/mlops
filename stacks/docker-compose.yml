@@ -1,4 +1,10 @@
 services:
+  base:
+    build:
+      context: ..
+      dockerfile: images/base.Dockerfile
+    image: base:latest
+
   timescaledb:
     image: timescale/timescaledb-ha:pg15-latest
     environment:
