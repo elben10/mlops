@@ -2,6 +2,10 @@ name: "CI"
 on:
   pull_request:
 
+env:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+
 jobs:
   build:
     runs-on: ubuntu-22.04

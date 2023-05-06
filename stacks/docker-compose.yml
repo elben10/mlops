@@ -1,0 +1,11 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb-ha:pg15-latest
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?Variable POSTGRES_PASSWORD not set}
+      POSTGRES_USER: ${POSTGRES_USER?Variable POSTGRES_USER not set}
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+
+volumes:
+  timescaledb_data:
