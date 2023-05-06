@@ -64,6 +64,16 @@ jobs:
           cache: "poetry"
       - name: Install python dependencies
         run: poetry install
+      - name: Install kompose
+        run: |
+          curl -L https://github.com/kubernetes/kompose/releases/download/v1.28.0/kompose-linux-amd64 -o /usr/local/bin/kompose
+          chmod +x /usr/local/bin/kompose
+      - name: Install k8s cluster
+        run: kind create cluster
+      - name: Deploy stack
+        run: |
+          kompose convert -f stacks/docker-compose.yml -o stacks/k8s.yml
+          kubectl apply -f stacks/k8s.yml
       - name: Run tests
         run: poetry run pytest -m integration
   unit-tests:
