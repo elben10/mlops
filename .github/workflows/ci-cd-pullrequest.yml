@@ -44,8 +44,7 @@ jobs:
         run: kind create cluster
       - name: Deploy stack
         run: |
-          kompose convert -f stacks/docker-compose.yml -o stacks/k8s.yml
-          ls stacks
+          kompose -f stacks/docker-compose.yml convert -o stacks/k8s.yml
           kubectl apply -f stacks/k8s.yml
       - name: Run tests
         run: poetry run pytest -m e2e
