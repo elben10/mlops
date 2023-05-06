@@ -20,6 +20,26 @@ jobs:
         with:
           files: |
             stacks/docker-compose.yml
+  e2e-tests:
+    runs-on: ubuntu-22.04
+    name: E2E Tests
+    needs: [build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install poetry
+        run: |
+          pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+      - name: Install python dependencies
+        run: poetry install
+      - name: Install k8s cluster
+        run: kind create cluster
+      - name: Run tests
+        run: poetry run pytest -m e2e
   integration-tests:
     runs-on: ubuntu-22.04
     name: Integration Tests
