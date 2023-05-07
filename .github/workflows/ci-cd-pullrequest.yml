@@ -7,7 +7,7 @@ env:
   POSTGRES_PASSWORD: postgres
 
 jobs:
-  build:
+  build-images:
     runs-on: ubuntu-22.04
     name: Build
     steps:
@@ -46,7 +46,7 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-22.04
     name: E2E Tests
-    needs: [build]
+    needs: [build-images, build-kompose]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -60,9 +60,10 @@ jobs:
       - name: Install python dependencies
         run: poetry install
       - name: Install kompose
-        run: |
-          curl -L https://github.com/kubernetes/kompose/releases/download/v1.28.0/kompose-linux-amd64 -o /usr/local/bin/kompose
-          chmod +x /usr/local/bin/kompose
+        uses: actions/download-artifact@master
+        with:
+          name: kompose
+          path: /usr/local/bin
       - name: Install k8s cluster
         run: kind create cluster --config config/kind/config.yml
       - name: Deploy stack
@@ -74,7 +75,7 @@ jobs:
   integration-tests:
     runs-on: ubuntu-22.04
     name: Integration Tests
-    needs: [build]
+    needs: [build-images, build-kompose]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -88,9 +89,10 @@ jobs:
       - name: Install python dependencies
         run: poetry install
       - name: Install kompose
-        run: |
-          curl -L https://github.com/kubernetes/kompose/releases/download/v1.28.0/kompose-linux-amd64 -o /usr/local/bin/kompose
-          chmod +x /usr/local/bin/kompose
+        uses: actions/download-artifact@master
+        with:
+          name: kompose
+          path: /usr/local/bin
       - name: Install k8s cluster
         run: kind create cluster --config config/kind/config.yml
       - name: Deploy stack
