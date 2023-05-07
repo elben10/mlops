@@ -41,11 +41,11 @@ jobs:
           curl -L https://github.com/kubernetes/kompose/releases/download/v1.28.0/kompose-linux-amd64 -o /usr/local/bin/kompose
           chmod +x /usr/local/bin/kompose
       - name: Install k8s cluster
-        run: kind create cluster
+        run: kind create cluster --config config/kind/config.yml
       - name: Deploy stack
         run: |
-          kompose convert -f stacks/docker-compose.yml -o stacks/k8s.yml
-          kubectl apply -f stacks/k8s.yml
+          kompose convert -f stacks/docker-compose.yml -o manifest/k8s.yml
+          kubectl apply -f manifest
       - name: Run tests
         run: poetry run pytest -m e2e
   integration-tests:
@@ -69,11 +69,11 @@ jobs:
           curl -L https://github.com/kubernetes/kompose/releases/download/v1.28.0/kompose-linux-amd64 -o /usr/local/bin/kompose
           chmod +x /usr/local/bin/kompose
       - name: Install k8s cluster
-        run: kind create cluster
+        run: kind create cluster --config config/kind/config.yml
       - name: Deploy stack
         run: |
           kompose convert -f stacks/docker-compose.yml -o stacks/k8s.yml
-          kubectl apply -f stacks/k8s.yml
+          kubectl apply -f kubectl apply -f manifest
       - name: Run tests
         run: poetry run pytest -m integration
   unit-tests:
