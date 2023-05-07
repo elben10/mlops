@@ -73,7 +73,7 @@ jobs:
       - name: Deploy stack
         run: |
           kompose convert -f stacks/docker-compose.yml -o stacks/k8s.yml
-          kubectl apply -f kubectl apply -f manifest
+          kubectl apply -f manifest
       - name: Run tests
         run: poetry run pytest -m integration
   unit-tests:
