@@ -69,9 +69,8 @@ jobs:
       - name: Deploy stack
         run: |
           chmod +x /usr/local/bin/kompose
-          kompose convert -f stacks/docker-compose.yml -o manifest/k8s.yml
-          kubectl apply -f manifest
-      - uses: lhotari/action-upterm@v1
+          kompose convert -f stacks/docker-compose.yml -o manifests/k8s.yml
+          kubectl apply -f manifests
       - name: Run tests
         run: poetry run pytest -m e2e
   integration-tests:
@@ -100,7 +99,7 @@ jobs:
       - name: Deploy stack
         run: |
           chmod +x /usr/local/bin/kompose
-          kompose convert -f stacks/docker-compose.yml -o manifest/k8s.yml
+          kompose convert -f stacks/docker-compose.yml -o manifests/k8s.yml
           kubectl apply -f manifest
       - name: Run tests
         run: poetry run pytest -m integration
