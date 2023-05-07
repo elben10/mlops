@@ -71,6 +71,7 @@ jobs:
           chmod +x /usr/local/bin/kompose
           kompose convert -f stacks/docker-compose.yml -o manifest/k8s.yml
           kubectl apply -f manifest
+      - uses: lhotari/action-upterm@v1
       - name: Run tests
         run: poetry run pytest -m e2e
   integration-tests:
