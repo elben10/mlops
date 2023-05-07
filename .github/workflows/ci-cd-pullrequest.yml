@@ -20,6 +20,20 @@ jobs:
       #   with:
       #     files: |
       #       stacks/docker-compose.yml
+  # Until a release is made larger than 1.28, we need to build kompose from source
+  build-kompose:
+    runs-on: ubuntu-22.04
+    name: Build kompose
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: kubernetes/kompose
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.20
+      - name: Build kompose
+        run: |
+          make bin
   e2e-tests:
     runs-on: ubuntu-22.04
     name: E2E Tests
@@ -72,7 +86,7 @@ jobs:
         run: kind create cluster --config config/kind/config.yml
       - name: Deploy stack
         run: |
-          kompose convert -f stacks/docker-compose.yml -o stacks/k8s.yml
+          kompose convert -f stacks/docker-compose.yml -o manifest/k8s.yml
           kubectl apply -f manifest
       - name: Run tests
         run: poetry run pytest -m integration
