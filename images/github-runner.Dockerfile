@@ -17,6 +17,6 @@ RUN curl -sSL https://get.docker.com/ | sh
 RUN pip install poetry && \
     poetry config virtualenvs.create false
 
-COPY images/scripts/github-runner-entrypoint.sh docker-entrypoint.sh
+COPY images/entrypoints/github-runner-entrypoint.sh docker-entrypoint.sh
 
 CMD ["bash", "docker-entrypoint.sh"]

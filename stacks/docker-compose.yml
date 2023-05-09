@@ -1,14 +1,23 @@
+configs:
+  dagster_config:
+    file: ../config/dagster/dagster.yaml
+  feast_config:
+    file: ../config/feast/feature_store.yaml
+  scality_config:
+    file: ../config/scality/config.json
 services:
   traefik:
     image: traefik:v2.10
     command:
+      - --accesslog=true
+      - --log.level=DEBUG
       - --api.insecure=true
       - --providers.kubernetesingress=true
       - --entrypoints.web.address=:80
-      - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
       - --entrypoints.web.http.redirections.entryPoint.scheme=https
-      - --entrypoints.web.http.tls=true
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
     labels:
       kompose.serviceaccount-name: traefik-account
     ports:
@@ -25,13 +34,151 @@ services:
         protocol: tcp
         mode: host
 
+  cloudserver:
+    image: zenko/cloudserver:latest
+    configs:
+      - source: scality_config
+        target: /usr/src/app/config.json
+    environment:
+      SCALITY_ACCESS_KEY_ID: ${S3_ACCESS_KEY?Variable S3_ACCESS_KEY not set}
+      SCALITY_SECRET_ACCESS_KEY: ${S3_SECRET_KEY?Variable S3_SECRET_KEY not set}
+      S3DATA: multiple
+      REMOTE_MANAGEMENT_DISABLE: "1"
+    ports:
+      - 8000
+    volumes:
+      - cloudserver_data:/usr/src/app/localData
+      - cloudserver_metadata:/usr/src/app/localMetadata
+
+  feast:
+    build:
+      context: ..
+      dockerfile: images/base.Dockerfile
+    configs:
+      - source: feast_config
+        target: /src/feature_store.yaml
+    image: base:latest
+    command: [ "bash", "/entrypoints/feast-entrypoint.sh" ]
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_HOST=${POSTGRES_HOST?Variable not set}
+      - POSTGRES_PORT=${POSTGRES_PORT?Variable not set}
+      - POSTGRES_DATABASE=${FEAST_DATABASE?Variable not set}
+    labels:
+      kompose.service.expose: "feast.localhost"
+      kompose.image-pull-policy: "Never"
+    ports:
+      - 8020
+
+  mlflow:
+    build:
+      context: ..
+      dockerfile: images/base.Dockerfile
+    command: [ "bash", "/entrypoints/mlflow-entrypoint.sh" ]
+    image: base:latest
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY?Variable S3_ACCESS_KEY not set}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY?Variable S3_SECRET_KEY not set}
+      AWS_ENDPOINT_URL: ${S3_ENDPOINT?Variable S3_ENDPOINT not set}
+      MLFLOW_BACKEND_STORE_URI: postgresql://${POSTGRES_USER?Variable POSTGRES_USER not set}:${POSTGRES_PASSWORD?Variable POSTGRES_PASSWORD not set}@${POSTGRES_HOST?Variable POSTGRES_HOST not set}:${POSTGRES_PORT?Variable POSTGRES_PORT not set}/${MLFLOW_DATABASE?Variable MLFLOW_DATABASE not set}
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: s3://${MLFLOW_BUCKET?Variable MLFLOW_BUCKET not set}/mlflow
+      MLFLOW_PORT: "8010"
+      MLFLOW_HOST: "0.0.0.0"
+    labels:
+      kompose.service.expose: "mlflow.localhost"
+      kompose.image-pull-policy: "Never"
+    ports:
+      - 8010
+
+  ray:
+    build:
+      context: ..
+      dockerfile: images/base.Dockerfile
+    command: [ "bash", "/entrypoints/ray-entrypoint.sh" ]
+    image: base:latest
+    labels:
+      kompose.service.expose: "ray.localhost"
+      kompose.image-pull-policy: "Never"
+    ports:
+      - 8265
+      - 6379
+      - 10001
+
   timescaledb:
     image: timescale/timescaledb-ha:pg15-latest
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?Variable POSTGRES_PASSWORD not set}
       POSTGRES_USER: ${POSTGRES_USER?Variable POSTGRES_USER not set}
+    ports:
+      - 5432:5432
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
 
+  dagster-code:
+    build:
+      context: ..
+      dockerfile: images/base.Dockerfile
+    command: [ "bash", "/entrypoints/dagster-code-entrypoint.sh" ]
+    labels:
+      kompose.image-pull-policy: "Never"
+
+    image: base:latest
+    ports:
+      - 4266
+  dagster-dagit:
+    build:
+      context: ..
+      dockerfile: images/base.Dockerfile
+    command: [ "bash", "/entrypoints/dagit-entrypoint.sh" ]
+    configs:
+      - source: dagster_config
+        target: /src/dagster.yaml
+    environment:
+      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY?Variable not set}
+      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_KEY?Variable not set}
+      - DAGSTER_HOME=/src
+      - DOCKER_NETWORK=${DAGSTER_NETWORK?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_HOST=${POSTGRES_HOST?Variable not set}
+      - POSTGRES_PORT=${POSTGRES_PORT?Variable not set}
+      - POSTGRES_DATABASE=${DAGSTER_DATABASE?Variable not set}
+      - S3_BUCKET=${DAGSTER_BUCKET?Variable not set}
+      - S3_ENDPOINT=${S3_ENDPOINT?Variable not set}
+    image: base:latest
+    labels:
+      kompose.service.expose: "dagit.localhost"
+      kompose.image-pull-policy: "Never"
+    ports:
+      - 3000
+  dagster-daemon:
+    build:
+      context: ..
+      dockerfile: images/base.Dockerfile
+    command: [ "bash", "/entrypoints/dagster-daemon-entrypoint.sh" ]
+    configs:
+      - source: dagster_config
+        target: /src/dagster.yaml
+    labels:
+      kompose.image-pull-policy: "Never"
+    environment:
+      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY?Variable not set}
+      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_KEY?Variable not set}
+      - DAGSTER_HOME=/src
+      - DOCKER_NETWORK=${DAGSTER_NETWORK?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_HOST=${POSTGRES_HOST?Variable not set}
+      - POSTGRES_PORT=${POSTGRES_PORT?Variable not set}
+      - POSTGRES_DATABASE=${DAGSTER_DATABASE?Variable not set}
+      - S3_BUCKET=${DAGSTER_BUCKET?Variable not set}
+      - S3_ENDPOINT=${S3_ENDPOINT?Variable not set}
+    image: base:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
 volumes:
+  cloudserver_data:
+  cloudserver_metadata:
   timescaledb_data:
