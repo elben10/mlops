@@ -84,10 +84,10 @@ jobs:
       - name: Deploy stack
         run: |
           chmod +x /usr/local/bin/kompose
-          docker compose -f stacks/docker-compose.yml > stacks/merged.docker-compose.yml
-          docker buildx bake -f stacks/docker-compose.yml
+          docker compose -f stacks/docker-compose.yml config > merged.docker-compose.yml
+          docker buildx bake -f merged.docker-compose.yml
           kind load docker-image base:latest
-          kompose convert -f stacks/docker-compose.yml -o manifests/k8s.yml
+          kompose convert -f merged.docker-compose.yml -o manifests/k8s.yml
           kubectl apply -f manifests
       - name: Run tests
         run: poetry run pytest -m e2e
