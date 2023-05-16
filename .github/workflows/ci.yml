@@ -7,7 +7,7 @@ env:
   DAGSTER_DATABASE: dagster
   DAGSTER_NETWORK: stacks_default
 
-  DOCKER_REGISTRY: ghcr.io/${{ github.repository_owner }}
+  DOCKER_REGISTRY: ghcr.io/${{ github.repository_owner }}/
 
   FEAST_DATABASE: feast
 
@@ -32,11 +32,13 @@ jobs:
         uses: actions/checkout@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - run: |
+          docker compose -f stacks/docker-compose.yml config > stacks/merged.docker-compose.yml
       - name: Build and push
         uses: docker/bake-action@v3
         with:
           files: |
-            stacks/docker-compose.yml
+            stacks/merged.docker-compose.yml
   # Until a release is made larger than 1.28, we need to build kompose from source
   build-kompose:
     runs-on: ubuntu-22.04
@@ -88,7 +90,7 @@ jobs:
           chmod +x /usr/local/bin/kompose
           docker compose -f stacks/docker-compose.yml config > merged.docker-compose.yml
           docker buildx bake -f merged.docker-compose.yml
-          kind load docker-image base:latest
+          kind load docker-image ${DOCKER_REGISTRY}base:latest
           kompose convert -f merged.docker-compose.yml -o manifests/k8s.yml
           kubectl apply -f manifests
       - name: Run tests
