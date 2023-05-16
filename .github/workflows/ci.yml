@@ -135,6 +135,7 @@ jobs:
       - name: Deploy stack
         run: |
           chmod +x /usr/local/bin/kompose
+          docker image ls
           kind load docker-image ${DOCKER_REGISTRY}base:latest
           kompose convert -f stacks/merged.docker-compose.yml -o manifests/k8s.yml
           kubectl apply -f manifests
