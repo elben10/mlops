@@ -34,7 +34,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
       - run: |
           docker compose -f stacks/docker-compose.yml config > stacks/merged.docker-compose.yml
-      - name: Build and push
+      - name: Build
         uses: docker/bake-action@v3
         with:
           files: |
@@ -85,11 +85,16 @@ jobs:
           path: /usr/local/bin
       - name: Install k8s cluster
         run: kind create cluster --config config/kind/config.yml
+      - run: |
+          docker compose -f stacks/docker-compose.yml config > stacks/merged.docker-compose.yml
+      - name: Build
+        uses: docker/bake-action@v3
+        with:
+          files: |
+            stacks/merged.docker-compose.yml
       - name: Deploy stack
         run: |
           chmod +x /usr/local/bin/kompose
-          docker compose -f stacks/docker-compose.yml config > merged.docker-compose.yml
-          docker buildx bake -f merged.docker-compose.yml
           kind load docker-image ${DOCKER_REGISTRY}base:latest
           kompose convert -f merged.docker-compose.yml -o manifests/k8s.yml
           kubectl apply -f manifests
@@ -118,10 +123,18 @@ jobs:
           path: /usr/local/bin
       - name: Install k8s cluster
         run: kind create cluster --config config/kind/config.yml
+      - run: |
+          docker compose -f stacks/docker-compose.yml config > stacks/merged.docker-compose.yml
+      - name: Build
+        uses: docker/bake-action@v3
+        with:
+          files: |
+            stacks/merged.docker-compose.yml
       - name: Deploy stack
         run: |
           chmod +x /usr/local/bin/kompose
-          kompose convert -f stacks/docker-compose.yml -o manifests/k8s.yml
+          kind load docker-image ${DOCKER_REGISTRY}base:latest
+          kompose convert -f merged.docker-compose.yml -o manifests/k8s.yml
           kubectl apply -f manifests
       - name: Run tests
         run: poetry run pytest -m integration
@@ -151,7 +164,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - run: |
-          docker compose -f stacks/docker-compose.yml config > merged.docker-compose.yml
+          docker compose -f stacks/docker-compose.yml config > stacks/merged.docker-compose.yml
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
