@@ -24,21 +24,6 @@ env:
   S3_SECRET_KEY: changethis
 
 jobs:
-  build-images:
-    runs-on: ubuntu-22.04
-    name: Build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - run: |
-          docker compose -f stacks/docker-compose.yml config > stacks/merged.docker-compose.yml
-      - name: Build
-        uses: docker/bake-action@v3
-        with:
-          files: |
-            stacks/merged.docker-compose.yml
   # Until a release is made larger than 1.28, we need to build kompose from source
   build-kompose:
     runs-on: ubuntu-22.04
@@ -65,7 +50,7 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-22.04
     name: E2E Tests
-    needs: [build-images, build-kompose]
+    needs: build-kompose
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -93,6 +78,7 @@ jobs:
         with:
           files: |
             stacks/merged.docker-compose.yml
+          load: true
       - name: Deploy stack
         run: |
           chmod +x /usr/local/bin/kompose
@@ -104,7 +90,7 @@ jobs:
   integration-tests:
     runs-on: ubuntu-22.04
     name: Integration Tests
-    needs: [build-images, build-kompose]
+    needs: build-kompose
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -132,10 +118,10 @@ jobs:
         with:
           files: |
             stacks/merged.docker-compose.yml
+          load: true
       - name: Deploy stack
         run: |
           chmod +x /usr/local/bin/kompose
-          docker image ls
           kind load docker-image ${DOCKER_REGISTRY}base:latest
           kompose convert -f stacks/merged.docker-compose.yml -o manifests/k8s.yml
           kubectl apply -f manifests
