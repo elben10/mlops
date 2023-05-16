@@ -69,6 +69,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
       - name: Install poetry
         run: |
           pipx install poetry
@@ -96,7 +97,7 @@ jobs:
         run: |
           chmod +x /usr/local/bin/kompose
           kind load docker-image ${DOCKER_REGISTRY}base:latest
-          kompose convert -f merged.docker-compose.yml -o manifests/k8s.yml
+          kompose convert -f stacks/merged.docker-compose.yml -o manifests/k8s.yml
           kubectl apply -f manifests
       - name: Run tests
         run: poetry run pytest -m e2e
@@ -107,6 +108,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
       - name: Install poetry
         run: |
           pipx install poetry
@@ -134,7 +136,7 @@ jobs:
         run: |
           chmod +x /usr/local/bin/kompose
           kind load docker-image ${DOCKER_REGISTRY}base:latest
-          kompose convert -f merged.docker-compose.yml -o manifests/k8s.yml
+          kompose convert -f stacks/merged.docker-compose.yml -o manifests/k8s.yml
           kubectl apply -f manifests
       - name: Run tests
         run: poetry run pytest -m integration
