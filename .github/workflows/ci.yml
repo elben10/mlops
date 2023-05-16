@@ -162,7 +162,7 @@ jobs:
         uses: docker/bake-action@v3
         with:
           files: |
-            stacks/docker-compose.yml
+            stacks/merged.docker-compose.yml
           push: true
   deploy-k8s:
     needs: ["deploy-images"]
