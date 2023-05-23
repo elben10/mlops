@@ -7,5 +7,4 @@ mlops-utils database create --uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSW
 exec dagit \
     -h 0.0.0.0 \
     -p 3000 \
-    --grpc-host dagster-code \
-    --grpc-port 4266
+    -w config/dagster/workspace.yaml

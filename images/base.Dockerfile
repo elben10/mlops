@@ -1,6 +1,6 @@
-FROM python:3.11
+FROM python:3.11-slim
 
-RUN pip install git+https://github.com/python-poetry/poetry && \
+RUN pip install poetry && \
     poetry config virtualenvs.create false
 
 WORKDIR /src
@@ -14,3 +14,4 @@ COPY src ./src
 RUN poetry install 
 
 COPY images/entrypoints /entrypoints
+COPY config /src/config
