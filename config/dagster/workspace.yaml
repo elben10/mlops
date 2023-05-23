@@ -1,0 +1,4 @@
+load_from:
+  - python_module:
+      module_name: mlops.etl
+      location_name: ETL

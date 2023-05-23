@@ -20,13 +20,20 @@ run_launcher:
   class: DockerRunLauncher
   config:
     env_vars:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - DAGSTER_DATABASE
+      - FEAST_DATABASE
       - POSTGRES_USER
       - POSTGRES_PASSWORD
       - POSTGRES_HOST
       - POSTGRES_PORT
-      - POSTGRES_DATABASE
       - S3_BUCKET
       - S3_ENDPOINT
+      - S3_ACCESS_KEY
+      - S3_SECRET_KEY
+    image:
+      env: DOCKER_IMAGE
     network:
       env: DOCKER_NETWORK
     container_kwargs:
@@ -47,7 +54,7 @@ run_storage:
       port:
         env: POSTGRES_PORT
       db_name:
-        env: POSTGRES_DATABASE
+        env: DAGSTER_DATABASE
 
 schedule_storage:
   module: dagster_postgres.schedule_storage
@@ -63,7 +70,7 @@ schedule_storage:
       port:
         env: POSTGRES_PORT
       db_name:
-        env: POSTGRES_DATABASE
+        env: DAGSTER_DATABASE
 
 event_log_storage:
   module: dagster_postgres.event_log
@@ -79,4 +86,4 @@ event_log_storage:
       port:
         env: POSTGRES_PORT
       db_name:
-        env: POSTGRES_DATABASE
+        env: DAGSTER_DATABASE
