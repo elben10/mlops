@@ -1,0 +1,40 @@
+services:
+  traefik:
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  feast:
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.feast.rule: Host(`feast.${DOMAIN?DOMAIN is not set}`)
+      traefik.http.services.feast.loadbalancer.server.port: "8020"
+
+  mlflow:
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.mlflow.rule: Host(`mlflow.${DOMAIN?DOMAIN is not set}`)
+      traefik.http.services.mlflow.loadbalancer.server.port: "8010"
+
+  ray:
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.ray.rule: Host(`ray.${DOMAIN?DOMAIN is not set}`)
+      traefik.http.services.ray.loadbalancer.server.port: "8265"
+
+  dagster-dagit:
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.dagit.rule: Host(`dagit.${DOMAIN?DOMAIN is not set}`)
+      traefik.http.services.dagit.loadbalancer.server.port: "3000"
+
+  dev:
+    command: [ "sleep", "infinity" ]
+    env_file: 
+      - "../.env"
+    image: ${DOCKER_REGISTRY}base:latest
+    volumes:
+      - ..:/src:cached

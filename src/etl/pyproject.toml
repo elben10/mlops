@@ -1,0 +1,15 @@
+[tool.poetry]
+authors = ["Jakob Jul Elben <elbenjakobjul@gmail.com>"]
+description = ""
+name = "mlops-etl"
+packages = [
+  {include = "mlops"},
+]
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]

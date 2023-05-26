@@ -1,0 +1,22 @@
+[tool.poetry]
+authors = ["Jakob Jul Elben <elbenjakobjul@gmail.com>"]
+description = ""
+name = "mlops_core"
+packages = [
+  {include = "mlops"},
+]
+version = "0.1.0"
+
+[tool.poetry.scripts]
+mlops-utils = "mlops.core.utils.__main__:app"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+typer = "^0.9.0"
+sqlalchemy-utils = "^0.41.1"
+psycopg2-binary = "^2.9.6"
+tenacity = "^8.2.2"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
