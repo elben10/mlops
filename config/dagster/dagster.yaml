@@ -87,3 +87,14 @@ event_log_storage:
         env: POSTGRES_PORT
       db_name:
         env: DAGSTER_DATABASE
+
+sensors:
+  use_threads: true
+  num_workers: 8
+
+schedules:
+  use_threads: true
+  num_workers: 8
+
+auto_materialize:
+  enabled: true
